@@ -1,7 +1,9 @@
 # Machine-Learning
 Coursera - Stanford Course on Machine Learning published under my [RPubs repository](https://rpubs.com/SulmanKhan/444167) and [GitHub repository](https://github.com/SulmanK/Machine-Learning)
 
-This readme includes lecture notes and programming exercises with commands to run the following MATLAB/Octave scripts. Each directory contains a pdf document with instructions and more detailed analyses for each exercise.
+Includes lecture notes and programming exercises with commands to run the following MATLAB/Octave scripts. 
+
+Each directory contains a pdf document with instructions and more detailed analyses for each exercise.
 
 
 ## Lecture Notes
