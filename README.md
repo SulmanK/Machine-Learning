@@ -18,26 +18,36 @@ This readme includes lecture notes and programming exercises with commands to ru
 
 ## Exercises
 
-* [Machine Learning : Exercise 1 - Linear Regression](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex1)
+* [Machine Learning : Exercise 1 - Linear Regression](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex1)
     + *Commands*: run ex1.m
 
-* [Machine Learning : Exercise 2 - Logistic Regression](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex2)
+* [Machine Learning : Exercise 2 - Logistic Regression](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex2)
     + *Commands*: run ex2.m
 
-* [Machine Learning : Exercise 3 - Multi-Class Classification and Neural Networks](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex3)
+* [Machine Learning : Exercise 3 - Multi-Class Classification and Neural Networks](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex3)
     + *Commands*: run ex3.m
 
-* [Machine Learning : Exercise 4 - Neural Networks - Learning](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex4)
+* [Machine Learning : Exercise 4 - Neural Networks - Learning](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex4)
     + *Commands*: run ex4.m
 
-* [Machine Learning : Exercise 5 - Machine Learning: Regularized Linear Regression and Bias v.s. Variance](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex5)
+* [Machine Learning : Exercise 5 - Machine Learning: Regularized Linear Regression and Bias v.s. Variance](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex5)
     + *Commands*: run ex5.m
 
-* [Machine Learning : Exercise 6 - Support Vector Machines](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex6)
+* [Machine Learning : Exercise 6 - Support Vector Machines](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex6)
     + *Commands*: run ex6.m
 
-* [Machine Learning : Exercise 7 - K-means Clustering and Principal Component Analysis](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex7)
+* [Machine Learning : Exercise 7 - K-means Clustering and Principal Component Analysis](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex7)
     + *Commands*: run ex7.m
 
-* [Machine Learning : Exercise 8 - Anomaly Detection and Recommender Systems](https://github.com/SulmanK/Machine-Learning/tree/master/machine-learning-ex8)
+* [Machine Learning : Exercise 8 - Anomaly Detection and Recommender Systems](https://github.com/SulmanK/Machine-Learning/tree/master/Exercises/machine-learning-ex8)
     + *Commands*: run ex8.m
+
+
+
+
+
+
+
+
+
+-Sulman Khan
