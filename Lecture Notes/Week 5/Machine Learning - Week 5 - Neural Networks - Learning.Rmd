@@ -1,0 +1,426 @@
+---
+title: 'Machine Learning: Week 5 - Neural Networks - Learning'
+author: "Sulman Khan"
+date: "October 26, 2018"
+output: 
+  html_document:
+    css: C:/Users/sulma/OneDrive/Desktop/Data Science/Machine Learning/gf_small_touches.css
+    highlight: tango
+    mathjax: default
+    theme: cerulean
+---
+
+```{r setup, cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE, tidy = FALSE}
+require(knitr)
+options(width = 200, scipen = 5)
+options(dplyr.print_max = 200)
+# options(width = 100, digits = 7)
+opts_chunk$set(message = FALSE, error = FALSE, warning = FALSE, 
+               collapse = TRUE, tidy = FALSE,
+               cache = TRUE, cache.path = '.cache/', 
+               fig.align = 'left', dpi = 100, fig.path = 'figures/Introductiontotextanalytics/')
+# opts_chunk$set(dev="png", 
+#                dev.args=list(type="cairo"),
+#                dpi=96)
+```
+---
+
+## Machine Learning: Neural Networks -  Learning
+
+
+### Cost Function
+
+a) L= total number of layers in the network
+
+b) \(s_l\) = number of units (not counting bias unit) in layer l
+
+c) K= number of output units/classes
+
+Recall that in neural networks, we may have many output nodes. We denote \(h_\Theta(x)_k\) as being a hypothesis that results in the \(k^{th}\) output.
+
+Our cost function for neural networks is going to be a generalization of the one we used for logistic regression.
+
+Recall that the cost function for regularized logistic regression was:
+
+$$J(\theta) = - \frac{1}{m} \sum_{i = 1}^{m} [y^{(i)} log(h_\theta(x^{(i)})) + (1 - y^{(i)})log(1 - h_\theta (x^{(i)})]) + \frac{\lambda}{2m} \sum_{j = 1}^n \theta_j^2 $$
+
+For neural networks, it is going to be slightly more complicated:
+
+$$\begin{gather*}\large J(\Theta) = - \frac{1}{m} \sum_{i=1}^m \sum_{k=1}^K \left[y^{(i)}_k \log ((h_\Theta (x^{(i)}))_k) + (1 - y^{(i)}_k)\log (1 - (h_\Theta(x^{(i)}))_k)\right] + \frac{\lambda}{2m}\sum_{l=1}^{L-1} \sum_{i=1}^{s_l} \sum_{j=1}^{s_{l+1}} ( \Theta_{j,i}^{(l)})^2\end{gather*}$$
+
+We have added a few nested summations to account for our multiple output nodes. In the first part of the equation, between the square brackets, we have an additional nested summation that loops through the number of output nodes.
+
+In the regularization part, after the square brackets, we must account for multiple theta matrices. The number of columns in our current theta matrix is equal to the number of nodes in our current layer (including the bias unit). The number of rows in our current theta matrix is equal to the number of nodes in the next layer (excluding the bias unit). As before with logistic regression, we square every term.
+
+Note:
+
+* the double sum simply adds up the logistic regression costs calculated for each cell in the output layer; and
+
+* the triple sum simply adds up the squares of all the individual \(\theta\)  s in the entire network.
+
+* the i in the triple sum does not refer to training example i
+
+### Backpropagation Algorithm
+
+"Backpropagation" is neural-network terminology for minimizing our cost function, just like what we were doing with gradient descent in logistic and linear regression.
+
+Our goal is to compute:
+
+$$min_\Theta J(\Theta)$$
+
+That is, we want to minimize our cost function J using an optimal set of parameters in theta.
+
+In this section we'll look at the equations we use to compute the partial derivative of \(J(\Theta)\):
+
+
+$$\frac{\partial}{\partial \Theta_{i,j}^{(l)}}J(\Theta)$$
+
+In back propagation we're going to compute for every node:
+
+$$ \delta_j^{(l)} = \text{"error" of node j in layer l}$$
+
+Recall that \(a_j^{(l)}\) is activation node j in layer l.
+
+For the last layer, we can compute the vector of delta values with:
+
+$$ \delta^{(L)} = a^{(L)} - y$$
+
+Where L is our total number of layers and \(a^{(L)}\) is the vector of outputs of the activation units for the last layer. So our "error values" for the last layer are simply the differences of our actual results in the last layer and the correct outputs in y.
+
+To get the delta values of the layers before the last layer, we can use an equation that steps us back from right to left:
+
+$$ \delta^{(l)} = ((\Theta^{(l)})^T \delta^{(l+1)}) \ .* \ g'(z^{(l)})$$
+
+The delta values of layer l are calculated by multiplying the delta values in the next layer with the theta matrix of layer l. We then element-wise multiply that with a function called g', or g-prime, which is the derivative of the activation function g evaluated with the input values given by z(l).
+
+The g-prime derivative terms can also be written out as:
+
+$$g'(u) = g(u) \ . * \ (1-g(u))$$
+
+The full back propagation equation for the inner nodes is then:
+
+$$ \delta^{(l)} = ((\Theta^{(l)})^T \delta^{(l+1)}) \ . * \ a^{(l)} \ . * \ (1 - a^{(l)})$$
+
+A. Ng states that the derivation and proofs are complicated and involved, but you can still implement the above equations to do back propagation without knowing the details.
+
+We can compute our partial derivative terms by multiplying our activation values and our error values for each training example t:
+
+$$ \frac{\partial J (\Theta)}{\partial \Theta^{(l)}_{i,j}} = \frac{1}{m} \sum_{t=1}^m a_k^{(t)(l)} \delta_i^{(t)(l-1)}$$
+
+Note: \(\delta^{l+1}\) and \(a^{l+1}\) are vectors with \(s_{l+1}\) elements. Similarly,  \( a^{(l)}\)  is a vector with \(s_l\) elements. Multiplying them produces a matrix that is \(s_{l+1}\) by \(s_l\) which is the same dimension as \(\Theta^{(l)}\). That is, the process produces a gradient term for every element in \(\Theta^{(l)}\). (Actually, \(\Theta^{(l)}\) has \(s_{l}\) + 1 column, so the dimensionality is not exactly the same).
+
+We can now take all these equations and put them together into a backpropagation algorithm:
+
+#### Back propagation Algorithm
+
+Given training set \(\lbrace (x^{(1)}, y^{(1)}) \cdots (x^{(m)}, y^{(m)})\rbrace\)
+
+* Set \(\Delta^{(l)}_{i,j} := 0 \) for all (l,i,j)
+
+For training example t =1 to m:
+
+* Set \(a^{(1)} := x^{(t)}\)
+
+* Perform forward propagation to compute \(a^{(l)}\) for l=2,3,.,L
+
+* Using \(y^{(t)}\), compute \(\delta^{(L)} = a^{(L)} - y^{(t)}\)
+
+* Compute \(\delta^{(L-1)}, \delta^{(L-2)},\dots,\delta^{(2)}\) using \(\delta^{(l)} = ((\Theta^{(l)})^T \delta^{(l+1)}) \ .*\ a^{(l)}\ .*\ (1 - a^{(l)})\)
+
+*  \(\Delta^{(l)}_{i,j} := \Delta^{(l)}_{i,j} + a_j^{(l)} \delta_i^{(l+1)} \) or with vectorization, \(\Delta^{(l)} := \Delta^{(l)} + \delta^{(l+1)}(a^{(l)})^T\)
+
+* \(D_{i,j}^{(l)} := \frac{1}{m} (\Delta_{i,j}^{(l)} + \lambda \Theta_{i,j}^{(l)})\) if \(j \ne 0\)
+
+* \(D_{i,j}^{(l)} := \frac{1}{m} \Delta_{i,j}^{(l)} + \) if \(j = 0\)
+
+The capital-delta matrix is used as an "accumulator" to add up our values as we go along and eventually compute our partial derivative.
+
+The actual proof is quite involved, but, the \(D^{(l)}_{i,j}\) terms are the partial derivatives and the results we are looking for:
+
+The actual proof is quite involved, but, the \(D^{(l)}_{i,j}\) terms are the partial derivatives and the results we are looking for:
+
+$$ D_{i,j}^{(l)}  =\frac{\partial J (\Theta)}{\partial \Theta^{(l)}_{i,j}} $$
+
+### Backpropagation Intuition
+
+$$ \begin{gather*}J(\theta) = - \frac{1}{m} \sum_{t=1}^m\sum_{k=1}^K  \left[ y^{(t)}_k \ \log (h_\theta (x^{(t)}))_k + (1 - y^{(t)}_k)\ \log (1 - h_\theta(x^{(t)})_k)\right] + \frac{\lambda}{2m}\sum_{l=1}^{L-1} \sum_{i=1}^{s_l} \sum_{j=1}^{s_l+1} ( \theta_{j,i}^{(l)})^2\end{gather*}$$
+
+If we consider simple non-multiclass classification (k = 1) and disregard regularization, the cost is computed with:
+
+$$ cost(t) = y^{(t)} \ log(h_\theta(x^{(t)})) + (1-y^{(t)}) \ log(1-h_\theta (x^{(t)}))$$
+
+More intuitively you can think of that equation roughly as:
+
+$$ cost(t) \approx (h_\theta (x^{(t)}) - y^{(t)})^2 $$
+
+Intuitively, \(\delta_j^{(l)}\) is the "error" for \(a^{(l)}\) (unit j in layer l)
+
+More formally, the delta values are actually the derivative of the cost function:
+
+$$ \delta_{j}^{(l)} = \frac{\partial}{\partial z_j^{(l)}} cost(t)$$
+
+Recall that our derivative is the slope of a line tangent to the cost function, so the steeper the slope the more incorrect we are.
+
+Note: In lecture, sometimes i is used to index a training example. Sometimes it is used to index a unit in a layer. In the Back Propagation Algorithm described here, t is used to index a training example rather than overloading the use of i.
+
+### Implementation Note: Unrolling Parameters
+
+With neural networks, we are working with sets of matrices:
+
+$$ \begin{align*}
+\Theta^{(1)}, \Theta^{(2)}, \Theta^{(3)}, \dots \newline
+D^{(1)}, D^{(2)}, D^{(3)}, \dots
+\end{align*}$$
+
+In order to use optimizing functions such as "fminunc()", we will want to "unroll" all the elements and put them into one long vector:
+
+```{octave, eval = FALSE}
+thetaVector = [ Theta1(:); Theta2(:); Theta3(:); ]
+deltaVector = [ D1(:); D2(:); D3(:) ]
+```
+
+If the dimensions of Theta1 is 10x11, Theta2 is 10x11 and Theta3 is 1x11, then we can get back our original matrices from the "unrolled" versions as follows:
+
+```{octave, eval = FALSE}
+Theta1 = reshape(thetaVector(1:110),10,11)
+Theta2 = reshape(thetaVector(111:220),10,11)
+Theta3 = reshape(thetaVector(221:231),1,11)
+```
+
+### Gradient Checking
+
+Gradient checking will assure that our backpropagation works as intended.
+
+We can approximate the derivative of our cost function with:
+
+$$ \frac{\partial}{\partial \Theta} J(\Theta) \approx \frac{J (\Theta + \epsilon) - J(\Theta - \epsilon)}{2 \epsilon}$$
+
+With multiple theta matrices, we can approximate the derivative with respect to \(\Theta_j\) as follows:
+
+$$ \frac{\partial}{\partial \Theta} J(\Theta) \approx \frac{J (\Theta_1, ..., \Theta_j + \epsilon, ..., \Theta_n) - J(\Theta_1, ..., \Theta_j - \epsilon, ..., \Theta_n}{2 \epsilon}$$
+
+A good small value for \(\epsilon\), guarantees the math above to become true. If the value be much smaller, may we will end up with numerical problems. The professor Andrew usually uses the value \(\epsilon = 10^{-4}\).
+
+We are only adding or subtracting epsilon to the \(\Theta_j\) matrix. In octave we can do it as follows:
+
+```{octave, eval = FALSE}
+epsilon = 1e-4;
+for i = 1:n,
+  thetaPlus = theta;
+  thetaPlus(i) += epsilon;
+  thetaMinus = theta;
+  thetaMinus(i) -= epsilon;
+  gradApprox(i) = (J(thetaPlus) - J(thetaMinus))/(2*epsilon)
+end;
+```
+
+We then want to check that gradApprox ??? deltaVector.
+
+Once you've verified once that your backpropagation algorithm is correct, then you don't need to compute gradApprox again. The code to compute gradApprox is very slow.
+
+### Random Initialization
+
+Initializing all theta weights to zero does not work with neural networks. When we backpropagate, all nodes will update to the same value repeatedly.
+
+Instead we can randomly initialize our weights:
+
+Initialize each \(\Theta^{(l)}_{ij}\) to a random value between \([-\epsilon,\epsilon]\):
+
+$$epsilon = \dfrac{\sqrt{6}}{\sqrt{\mathrm{Loutput} + \mathrm{Linput}}}$$
+
+$$\Theta^{(l)} = 2 \epsilon \; \mathrm{rand}(\mathrm{Loutput}, \mathrm{Linput} + 1) - \epsilon$$
+
+```{octave, eval = FALSE}
+If the dimensions of Theta1 is 10x11, Theta2 is 10x11 and Theta3 is 1x11.
+
+Theta1 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta2 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta3 = rand(1,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+```
+
+rand(x,y) will initialize a matrix of random real numbers between 0 and 1. (Note: this epsilon is unrelated to the epsilon from Gradient Checking)
+
+Why use this method? This paper may be useful: https://web.stanford.edu/class/ee373b/nninitialization.pdf 
+
+### Putting it Together
+
+First, pick a network architecture; choose the layout of your neural network, including how many hidden units in each layer and how many layers total.
+
+* Number of input units = dimension of features \(x^{(i)}\)
+
+* Number of output units = number of classes
+
+* Number of hidden units per layer = usually more the better (must balance with cost of computation as it increases with more hidden units)
+
+* Defaults: 1 hidden layer. If more than 1 hidden layer, then the same number of units in every hidden layer.
+
+#### Training a Neural Network
+
+* Randomly initialize the weights
+* Implement forward propagation to get \(h_\theta(x^{(i)})\)
+* Implement the cost function
+* Implement backpropagation to compute partial derivatives
+* Use gradient checking to confirm that your backpropagation works. Then disable gradient checking.
+* Use gradient descent or a built-in optimization function to minimize the cost function with the weights in theta.
+
+When we perform forward and back propagation, we loop on every training example:
+
+```{octave, eval = FALSE}
+for i = 1:m,
+   Perform forward propagation and backpropagation using example (x(i),y(i))
+   (Get activations a(l) and delta terms d(l) for l = 2,...,L
+```
+
+### Bonus: Tutorial on How to classify your own images of digits 
+
+This tutorial will guide you on how to use the classifier provided in exercise 3 to classify you own images like this:
+
+
+#### Introduction
+
+The classifier provided expects 20 x 20 pixels black and white images converted in a row vector of 400 real numbers like this
+
+```{octave, eval = FALSE}
+[ 0.14532, 0.12876, ...]
+```
+
+Each pixel is represented by a real number between -1.0 to 1.0, meaning -1.0 equal black and 1.0 equal white (any number in between is a shade of gray, and number 0.0 is exactly the middle gray).
+
+#### .jpg and color RGB images
+
+The most common image format that can be read by Octave is .jpg using function that outputs a three-dimensional matrix of integer numbers from 0 to 255, representing the height x width x 3 integers as indexes of a color map for each pixel (explaining color maps is beyond scope)
+
+```{octave, eval = FALSE}
+Image3DmatrixRGB = imread("myOwnPhoto.jpg");
+```
+
+#### Convert to Black & White
+
+A common way to convert color images to black & white, is to convert them to a YIQ standard and keep only the Y component that represents the luma information (black & white). I and Q represent the chrominance information (color).Octave has a function rgb2ntsc() that outputs a similar three-dimensional matrix but of real numbers from -1.0 to 1.0, representing the height x width x 3 (Y luma, I in-phase, Q quadrature) intensity for each pixel.
+
+```{octave, eval = FALSE}
+Image3DmatrixYIQ = rgb2ntsc(MyImageRGB);
+```
+
+To obtain the Black & White component just discard the I and Q matrices. This leaves a two-dimensional matrix of real numbers from -1.0 to 1.0 representing the height x width pixels black & white values.
+
+#### Cropping to square image
+
+It is useful to crop the original image to be as square as possible. The way to crop a matrix is by selecting an area inside the original B&W image and copy it to a new matrix. This is done by selecting the rows and columns that define the area. In other words, it is copying a rectangular subset of the matrix like this:
+
+```{ocave, eval = FALSE}
+
+croppedImage = Image2DmatrixBW(origen1:size1, origin2:size2);
+```
+
+Cropping does not have to be all the way to a square.It could be cropping just a percentage of the way to a square so you can leave more of the image intact. The next step of scaling will take care of stretching the image to fit a square.
+
+#### Scaling to 20 x 20 pixels
+
+The classifier provided was trained with 20 x 20 pixels images so we need to scale our photos to meet. It may cause distortion depending on the height and width ratio of the cropped original photo. There are many ways to scale a photo but we are going to use the simplest one. We lay a scaled grid of 20 x 20 over the original photo and take a sample pixel on the center of each grid. To lay a scaled grid, we compute two vectors of 20 indexes each evenly spaced on the original size of the image. One for the height and one for the width of the image. For example, in an image of 320 x 200 pixels will produce to vectors like
+
+```{octave, eval = FALSE}
+[9    25    41    57    73 ... 313] % 20 indexes
+```
+
+```{octave, eval = FALSE}
+[6    16    26    36    46 ... 196] % 20 indexes
+```
+
+Copy the value of each pixel located by the grid of these indexes to a new matrix. Ending up with a matrix of 20 x 20 real numbers.
+
+#### Black & White to Gray & White
+
+The classifier provided was trained with images of white digits over gray background. Specifically, the 20 x 20 matrix of real numbers ONLY range from 0.0 to 1.0 instead of the complete black & white range of -1.0 to 1.0, this means that we have to normalize our photos to a range 0.0 to 1.0 for this classifier to work. But also, we invert the black and white colors because is easier to "draw" black over white on our photos and we need to get white digits. So in short, we invert black and white and stretch black to gray.
+
+#### Rotation of image
+
+Some times our photos are automatically rotated like in our cellular phones. The classifier provided can not recognize rotated images so we may need to rotate it back sometimes. This can be done with an Octave function rot90() like this.
+
+```{octave, eval = FALSE}
+ImageAligned = rot90(Image, rotationStep);
+```
+
+Where rotationStep is an integer: -1 mean rotate 90 degrees CCW and 1 mean rotate 90 degrees CW.
+
+#### Approach
+
+1) The approach is to have a function that converts our photo to the format the classifier is expecting. As if it was just a sample from the training data set.
+2) Use the classifier to predict the digit in the converted image.
+    
+#### Complete Code
+
+```{octave, eval = FALSE}
+function vectorImage = imageTo20x20Gray(fileName, cropPercentage=0, rotStep=0)
+%IMAGETO20X20GRAY display reduced image and converts for digit classification
+%
+% Sample usage: 
+%       imageTo20x20Gray('myDigit.jpg', 100, -1);
+%
+%       First parameter: Image file name
+%             Could be bigger than 20 x 20 px, it will
+%             be resized to 20 x 20. Better if used with
+%             square images but not required.
+% 
+%       Second parameter: cropPercentage (any number between 0 and 100)
+%             0  0% will be cropped (optional, no needed for square images)
+%            50  50% of available croping will be cropped
+%           100  crop all the way to square image (for rectangular images)
+% 
+%       Third parameter: rotStep
+%            -1  rotate image 90 degrees CCW
+%             0  do not rotate (optional)
+%             1  rotate image 90 degrees CW
+%
+% (Thanks to Edwin Frühwirth for parts of this code)
+% Read as RGB image
+Image3DmatrixRGB = imread(fileName);
+% Convert to NTSC image (YIQ)
+Image3DmatrixYIQ = rgb2ntsc(Image3DmatrixRGB );
+% Convert to grays keeping only luminance (Y) and discard chrominance (IQ)
+Image2DmatrixBW  = Image3DmatrixYIQ(:,:,1);
+% Get the size of your image
+oldSize = size(Image2DmatrixBW);
+% Obtain crop size toward centered square (cropDelta)
+% ...will be zero for the already minimum dimension
+% ...and if the cropPercentage is zero, 
+% ...both dimensions are zero
+% ...meaning that the original image will go intact to croppedImage
+cropDelta = floor((oldSize - min(oldSize)) .* (cropPercentage/100));
+% Compute the desired final pixel size for the original image
+finalSize = oldSize - cropDelta;
+% Compute each dimension origin for croping
+cropOrigin = floor(cropDelta / 2) + 1;
+% Compute each dimension copying size
+copySize = cropOrigin + finalSize - 1;
+% Copy just the desired cropped image from the original B&W image
+croppedImage = Image2DmatrixBW( ...
+                    cropOrigin(1):copySize(1), cropOrigin(2):copySize(2));
+% Resolution scale factors: [rows cols]
+scale = [20 20] ./ finalSize;
+% Compute back the new image size (extra step to keep code general)
+newSize = max(floor(scale .* finalSize),1); 
+% Compute a re-sampled set of indices:
+rowIndex = min(round(((1:newSize(1))-0.5)./scale(1)+0.5), finalSize(1));
+colIndex = min(round(((1:newSize(2))-0.5)./scale(2)+0.5), finalSize(2));
+% Copy just the indexed values from old image to get new image
+newImage = croppedImage(rowIndex,colIndex,:);
+% Rotate if needed: -1 is CCW, 0 is no rotate, 1 is CW
+newAlignedImage = rot90(newImage, rotStep);
+% Invert black and white
+invertedImage = - newAlignedImage;
+% Find min and max grays values in the image
+maxValue = max(invertedImage(:));
+minValue = min(invertedImage(:));
+% Compute the value range of actual grays
+delta = maxValue - minValue;
+% Normalize grays between 0 and 1
+normImage = (invertedImage - minValue) / delta;
+% Add contrast. Multiplication factor is contrast control.
+contrastedImage = sigmoid((normImage -0.5) * 5);
+% Show image as seen by the classifier
+imshow(contrastedImage, [-1, 1] );
+% Output the matrix as a unrolled vector
+vectorImage = reshape(contrastedImage, 1, newSize(1)*newSize(2));
+end
+```

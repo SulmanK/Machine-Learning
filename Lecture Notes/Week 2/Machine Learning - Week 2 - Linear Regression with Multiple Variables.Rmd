@@ -1,0 +1,445 @@
+---
+title: 'Machine Learning: Week 2 - Linear Regression with Multiple Variables'
+author: "Sulman Khan"
+date: "October 26, 2018"
+output: 
+  html_document:
+    css: C:/Users/sulma/OneDrive/Desktop/Data Science/Machine Learning/gf_small_touches.css
+    highlight: tango
+    mathjax: default
+    theme: cerulean
+---
+
+```{r setup, cache = FALSE, echo = FALSE, message = FALSE, warning = FALSE, tidy = FALSE}
+require(knitr)
+options(width = 200, scipen = 5)
+options(dplyr.print_max = 200)
+# options(width = 100, digits = 7)
+opts_chunk$set(message = FALSE, error = FALSE, warning = FALSE, 
+               collapse = TRUE, tidy = FALSE,
+               cache = TRUE, cache.path = '.cache/', 
+               fig.align = 'left', dpi = 100, fig.path = 'figures/Introductiontotextanalytics/')
+# opts_chunk$set(dev="png", 
+#                dev.args=list(type="cairo"),
+#                dpi=96)
+```
+---
+
+## Machine Learning 
+
+### Linear Regression with Multiple Variables
+
+Linear regression with multiple variables is also known as "multivariate linear regression".
+
+We now introduce notation for equations where we can have any number of input variables.
+
+$$\begin{align*}x_j^{(i)} &= \text{value of feature } j \text{ in the }i^{th}\text{ training example} \newline x^{(i)}& = \text{the column vector of all the feature inputs of the }i^{th}\text{ training example} \newline m &= \text{the number of training examples} \newline n &= \left| x^{(i)} \right| ; \text{(the number of features)} \end{align*}$$
+
+Now define the multivariate form of the hypothesis function as follows, accommodating these multiple features:
+
+$$h_\theta(x) = \theta_0 + \theta_1x_1 + \theta_2 x_2 + \theta_3 x_3 + ... + \theta_n x_n $$
+
+In order to develop intuition about this function, we can think about \(\theta_0\) as the basic price of a house, \(\theta_1\) as the price per square meter, \(\theta_2\) as the price per floor, etc. \(x_1\) will be the number of square meters in the house, \(x_2\) the number of floors, etc.
+
+Using the definition of matrix multiplication, our multivariate hypothesis function can be concisely represented as:
+
+$$h_\theta (x) = \left [ \matrix { \theta_0 & \theta_1 ... & \theta_n } \right ]  \left [ \matrix { x_0 \\ x_1 \\ ... \\ x_n} \right ] = \theta^T x$$
+
+This is a vectorization of our hypothesis function for one training example; see the lessons on vectorization to learn more.
+
+Remark: Note that for convenience reasons in this course Mr. Ng assumes 
+
+$$x_{0}^{(i)} = 1 \ for \ (i \in 1, ..., m)$$ 
+
+[Note: So that we can do matrix operations with theta and x, we will set \(x_{(0)}^{(i)} = 1\), for all values of i. This makes the two vectors 'theta' and \(x_{(i)} \) match each other element-wise (that is, have the same number of elements: n+1).]
+
+The training examples are stored in X row-wise, like such:
+
+$$\left[\matrix{x_{(0)}^{(1)} & x_{(1)}^{(1)} \\ x_{(0)}^{(2)} & x_{(1)}^{(2)} \\ x_{(0)}^{(3)} & x_{(1)}^{(3)}} \right] , \theta = \left[\matrix {\theta_0 \\ \theta_1}\right]$$
+
+
+
+You can calculate the hypothesis as a column vector of size (m x 1) with:
+
+$$h_\theta (X) = X\theta$$
+
+### Cost Function
+
+For the parameter vector \(\theta\) (of type \(\mathbb{R}^{n+1}\) or in \(\mathbb{R}^{(n+1) \times 1}\), the cost function is:
+
+$$J(\theta) = \frac{1}{2m} \sum_{i=1}^{m} (h_\theta (x_i) - y_i)^2$$
+
+The vectorized version is:
+
+$$J(\theta) = \frac{1}{2m} (X \theta - \bar{y})^T (X \theta - \bar{y})$$
+
+where \(\bar{y}\) denotes the vector of all y values
+
+### Gradient Descent for Multiple Variables
+
+The gradient descent equation itself is generally the same form; we just have to repeat it for our 'n' features:
+
+repeat until convergence: {
+
+$$\theta_0 := \theta_0 - \alpha \frac{1}{m} \sum_{i = 1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) * x_0^{(i)}$$
+
+$$\theta_1 := \theta_1 - \alpha \frac{1}{m} \sum_{i = 1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) * x_1^{(i)}$$
+
+$$\theta_2 := \theta_2 - \alpha \frac{1}{m} \sum_{i = 1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) * x_2^{(i)}$$
+
+...
+
+}
+
+In other words:
+
+repeat until convergence: {
+
+$$\theta_j := \theta_j - \alpha \frac{1}{m} \sum_{i = 1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) * x_0^{(i)} \  for \ j := 0.n$$
+
+
+...
+
+}
+
+### Matrix Notation
+
+The Gradient Descent rule can be expressed as:
+
+$$\theta := \theta - \alpha \nabla J(\theta) $$
+
+where \(\nabla J(\theta)\) is a column vector of the form:
+
+$$\nabla J(\theta) =  \left[\matrix{ \frac{\partial J (\theta)}{\partial \theta_0 } \\ \frac{\partial J (\theta)}{\partial \theta_1 } \\ . \\ . \\ . \\ \frac{\partial J (\theta)}{\partial \theta_n }} \right]$$
+
+The j-th component of the gradient is the summation of the product of two terms:
+
+$$\frac{\partial J (\theta)}{\partial \theta_j} =  \frac{1}{m} \sum_{i = 1}^{m} (h_\theta(x^{(i)}) - y^{(i)}) * x_j^{(i)}$$
+
+$$= \frac{1}{m} \sum_{i = 1}^{m} x_j^{(i)}*(h_\theta(x^{(i)}) - y^{(i)})$$
+
+Sometimes, the summation of the product of two terms can be expressed as the product of two vectors.
+
+Here, \(x_j^{(i)}\), for i = 1,...,m, represents the m elements of the j-th column, \(\bar{x}_j\) , of the training set X.
+
+The other term \((h_\theta (x^{(i)}) - y^{(i)})\) is the vector of the deviations between the predictions \(h_\theta (x^{(i)})\) and the true values \(y^{(i)}\). Re-writing \(\frac{\partial J (\theta)}{\partial \theta_j}\) we have:
+
+
+$$\frac{\partial J (\theta)}{\partial \theta_j} = \frac{1}{m} \bar{x}_j^T (X \theta - \bar{y})$$
+
+$$\nabla J (\theta) = \frac{1}{m} X^T (X \theta - \bar{y})$$
+
+Finally, the matrix notation (vectorized) of the Gradient Descent rule is:
+
+$$\theta := \theta - \frac{\alpha}{m} X^T (X \theta - \bar{y})$$
+
+### Feature Normalization
+
+We can speed up gradient descent by having each of our input values in roughly the same range. This is because \(\theta\) will descend quickly on small ranges and slowly on large ranges, and so will oscillate inefficiently down to the optimum when the variables are very uneven.
+
+The way to prevent this is to modify the ranges of our input variables so that they are all roughly the same. Ideally:
+
+$$\neg 1 \leq x_{(i)} \leq 1 $$
+
+or
+
+$$\neg 0.5 \leq x_{(i)} \leq 0.5 $$
+
+These aren't exact requirements; we are only trying to speed things up. The goal is to get all input variables into roughly one of these ranges, give or take a few.
+
+Two techniques to help with this are feature scaling and mean normalization. Feature scaling involves dividing the input values by the range (i.e. the maximum value minus the minimum value) of the input variable, resulting in a new range of just 1. Mean normalization involves subtracting the average value for an input variable from the values for that input variable, resulting in a new average value for the input variable of just zero. To implement both of these techniques, adjust your input values as shown in this formula:
+
+$$x_i := \frac{x_i - \mu_i}{s_i}$$
+
+Where \(\mu_i\) is the average of all the values for feature (i) and \(s_i\) is the range of values (max - min), or \(s_i\) is the standard deviation.
+
+Note that dividing by the range, or dividing by the standard deviation, give different results. The quizzes in this course use range - the programming exercises use standard deviation.
+
+Example: \(x_i\) is housing prices with range of 100 to 2000, with a mean value of 1000. Then,
+
+$$x_i := \frac{price - 1000}{1900}$$
+
+### Features and Polynomial Regression
+
+We can improve our features and the form of our hypothesis function in a couple different ways.
+
+We can combine multiple features into one. For example, we can combine \(x_1\) and \(x_2\) into a new feature \(x_3\) by taking \(x_1\)???\(x_2\).
+
+#### Polynomial Regression
+
+Our hypothesis function need not be linear (a straight line) if that does not fit the data well.
+
+We can change the behavior or curve of our hypothesis function by making it a quadratic, cubic or square root function (or any other form).
+
+For example, if our hypothesis function is \(h_\theta(x) = \theta_0 + \theta_1 x_1\)then we can create additional features based on \(x_1\), to get the quadratic function \(h_\theta(x) = \theta_0 + \theta_1 x_1 + \theta_2 x_1^2\) or the cubic function \(h_\theta(x) = \theta_0 + \theta_1 x_1 + \theta_2 x_1^2 + \theta_3 x_1^3\)
+
+In the cubic version, we have created new features \(x_2\) and \(x_3\) where \(x2 = x_1^2\) and \(x3= x_1^3\).
+
+To make it a square root function, we could do: \(h_\theta(x) = \theta_0 + \theta_1 x_1 + \theta_2 \sqrt{x_1}\)
+
+### Normal Equation
+
+The "Normal Equation" is a method of finding the optimum theta without iteration.
+
+$$\theta = (X^T X)^{-1} X^T y$$
+
+There is no need to do feature scaling with the normal equation.
+
+Mathematical proof of the Normal equation requires knowledge of linear algebra and is fairly involved, so you do not need to worry about the details.
+
+The following is a comparison of gradient descent and the normal equation:
+
+| Gradient Descent| Normal Equation| 
+| -------|:-------:| 
+| Need to choose alpha     | No need to choose alpha| 
+| Needs many iterations     | 	No need to iterate       |
+| \(0 (kn^2)\)      | \(0 (kn^2)\), need to calculate inverse of \(X^T X\)       |
+| Works well when n is large      | Slow if n is very large       |
+
+With the normal equation, computing the inversion has complexity \(O (n^3)\). So if we have a very large number of features, the normal equation will be slow. In practice, when n exceeds 10,000 it might be a good time to go from a normal solution to an iterative process.
+
+
+#### Normal Equation Noninvertibility
+
+When implementing the normal equation in octave we want to use the 'pinv' function rather than 'inv.'
+
+\(X^TX\) may be noninvertible. The common causes are:
+
+* Redundant features, where two features are very closely related (i.e. they are linearly dependent)
+
+* Too many features (e.g. m \(\leq\) n). In this case, delete some features or use "regularization" (to be explained in a later lesson).
+
+Solutions to the above problems include deleting a feature that is linearly dependent with another or deleting one or more features when there are too many features.
+
+### Octave Tutorial
+
+#### Basic Operations
+
+```{octave eval = FALSE}
+%% dimensions
+sz = size(A) % 1x2 matrix: [(number of rows) (number of columns)]
+size(A,1) % number of rows
+size(A,2) % number of cols
+length(v) % size of longest dimension
+
+
+%% loading data
+pwd   % show current directory (current path)
+cd 'C:\Users\ang\Octave files'  % change directory 
+ls    % list files in current directory 
+load q1y.dat   % alternatively, load('q1y.dat')
+load q1x.dat
+who   % list variables in workspace
+whos  % list variables in workspace (detailed view) 
+clear q1y      % clear command without any args clears all vars
+v = q1x(1:10); % first 10 elements of q1x (counts down the columns)
+save hello.mat v;  % save variable v into file hello.mat
+save hello.txt v -ascii; % save as ascii
+% fopen, fread, fprintf, fscanf also work  [[not needed in class]]
+
+%% indexing
+A(3,2)  % indexing is (row,col)
+A(2,:)  % get the 2nd row. 
+        % ":" means every element along that dimension
+A(:,2)  % get the 2nd col
+A([1 3],:) % print all  the elements of rows 1 and 3
+
+A(:,2) = [10; 11; 12]     % change second column
+A = [A, [100; 101; 102]]; % append column vec
+A(:) % Select all elements as a column vector.
+
+% Putting data together 
+A = [1 2; 3 4; 5 6]
+B = [11 12; 13 14; 15 16] % same dims as A
+C = [A B]  % concatenating A and B matrices side by side
+C = [A, B] % concatenating A and B matrices side by side
+C = [A; B] % Concatenating A and B top and bottom
+
+```
+
+#### Computing on Data
+```{octave eval = FALSE}
+%% initialize variables
+A = [1 2;3 4;5 6]
+B = [11 12;13 14;15 16]
+C = [1 1;2 2]
+v = [1;2;3]
+
+%% matrix operations
+A * C  % matrix multiplication
+A .* B % element-wise multiplication
+% A .* C  or A * B gives error - wrong dimensions
+A .^ 2 % element-wise square of each element in A
+1./v   % element-wise reciprocal
+log(v)  % functions like this operate element-wise on vecs or matrices 
+exp(v)
+abs(v)
+
+-v  % -1*v
+
+v + ones(length(v), 1)  
+% v + 1  % same
+
+A'  % matrix transpose
+
+% misc useful functions
+
+% max  (or min)
+a = [1 15 2 0.5]
+val = max(a)
+[val,ind] = max(a) % val -  maximum element of the vector a and index - index value where maximum occur
+val = max(A) % if A is matrix, returns max from each column
+
+% compare values in a matrix & find
+a < 3 % checks which values in a are less than 3
+find(a < 3) % gives location of elements less than 3
+A = magic(3) % generates a magic matrix - not much used in ML algorithms
+[r,c] = find(A>=7)  % row, column indices for values matching comparison
+
+% sum, prod
+sum(a)
+prod(a)
+floor(a) % or ceil(a)
+max(rand(3),rand(3))
+max(A,[],1) -  maximum along columns(defaults to columns - max(A,[]))
+max(A,[],2) - maximum along rows
+A = magic(9)
+sum(A,1)
+sum(A,2)
+sum(sum( A .* eye(9) ))
+sum(sum( A .* flipud(eye(9)) ))
+
+
+% Matrix inverse (pseudo-inverse)
+pinv(A)        % inv(A'*A)*A'
+```
+
+#### Plotting Data
+```{octave eval = FALSE}
+%% plotting
+t = [0:0.01:0.98];
+y1 = sin(2*pi*4*t); 
+plot(t,y1);
+y2 = cos(2*pi*4*t);
+hold on;  % "hold off" to turn off
+plot(t,y2,'r');
+xlabel('time');
+ylabel('value');
+legend('sin','cos');
+title('my plot');
+print -dpng 'myPlot.png'
+close;           % or,  "close all" to close all figs
+figure(1); plot(t, y1);
+figure(2); plot(t, y2);
+figure(2), clf;  % can specify the figure number
+subplot(1,2,1);  % Divide plot into 1x2 grid, access 1st element
+plot(t,y1);
+subplot(1,2,2);  % Divide plot into 1x2 grid, access 2nd element
+plot(t,y2);
+axis([0.5 1 -1 1]);  % change axis scale
+
+%% display a matrix (or image) 
+figure;
+imagesc(magic(15)), colorbar, colormap gray;
+% comma-chaining function calls.  
+a=1,b=2,c=3
+a=1;b=2;c=3;
+```
+
+#### Control statements: for, while, if statements
+
+```{octave eval = FALSE}
+v = zeros(10,1);
+for i=1:10, 
+    v(i) = 2^i;
+end;
+% Can also use "break" and "continue" inside for and while loops to control execution.
+
+i = 1;
+while i <= 5,
+  v(i) = 100; 
+  i = i+1;
+end
+
+i = 1;
+while true, 
+  v(i) = 999; 
+  i = i+1;
+  if i == 6,
+    break;
+  end;
+end
+
+if v(1)==1,
+  disp('The value is one!');
+elseif v(1)==2,
+  disp('The value is two!');
+else
+  disp('The value is not one or two!');
+end
+```
+
+#### Functions
+To create a function, type the function code in a text editor (e.g. gedit or notepad), and save the file as "functionName.m"
+```{octave, eval = FALSE}
+function y = squareThisNumber(x)
+
+y = x^2;
+```
+
+To call the function in Octave, do either:
+
+1) Navigate to the directory of the functionName.m file and call the function:
+
+```{octave, eval = FALSE}
+    % Navigate to directory:
+    cd /path/to/function
+
+    % Call the function:
+    functionName(args)
+```
+
+Add the directory of the function to the load path and save it:You should not use addpath/savepath for any of the assignments in this course. Instead use 'cd' to change the current working directory. Watch the video on submitting assignments in week 2 for instructions.
+
+```{octave, eval = FALSE}
+    % To add the path for the current session of Octave:
+    addpath('/path/to/function/')
+
+    % To remember the path for future sessions of Octave, after executing addpath above, also do:
+    savepath
+```
+
+Octave's functions can return more than one value:
+```{octave, eval = FALSE}
+    function [y1, y2] = squareandCubeThisNo(x)
+    y1 = x^2
+    y2 = x^3
+```
+
+Call the above function this way:
+```{octave, eval = FALSE}
+    [a,b] = squareandCubeThisNo(x)
+```
+
+#### Vectorization
+
+Vectorization is the process of taking code that relies on loops and converting it into matrix operations. It is more efficient, more elegant, and more concise.
+
+As an example, let's compute our prediction from a hypothesis. Theta is the vector of fields for the hypothesis and x is a vector of variables.
+
+With loops:
+
+```{octave, eval = FALSE}
+prediction = 0.0;
+for j = 1:n+1,
+  prediction += theta(j) * x(j);
+end;
+```
+
+With vectorization:
+
+```{r, eval = FALSE}
+prediction = theta' * x;
+```
+
+If you recall the definition multiplying vectors, you'll see that this one operation does the element-wise multiplication and overall sum in a very concise notation.
